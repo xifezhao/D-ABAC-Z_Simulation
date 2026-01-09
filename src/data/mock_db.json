@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "description": "Initial system state seed for Case Study 1 (Dr. Alice)",
+    "paper_reference": "Section 6.1 - Setup Parameters",
+    "usage": "Loaded by src.components.trust_engine and src.components.pip to initialize GlobalState."
+  },
+  "subjects": {
+    "alice": {
+      "id": "alice",
+      "name": "Dr. Alice",
+      "static_attributes": {
+        "role": "physician",
+        "department": "cardiology",
+        "clearance_level": "secret"
+      },
+      "initial_trust_state": {
+        "score": 0.75,
+        "description": "Standard authenticated user with verified history"
+      }
+    },
+    "bob_intern": {
+      "id": "bob",
+      "name": "Bob (Intern)",
+      "static_attributes": {
+        "role": "intern",
+        "department": "general",
+        "clearance_level": "public"
+      },
+      "initial_trust_state": {
+        "score": 0.50,
+        "description": "New user, neutral trust anchor"
+      }
+    }
+  },
+  "objects": {
+    "record_8842": {
+      "id": "record_8842",
+      "description": "Patient Health Record #8842 (The target asset)",
+      "security_metadata": {
+        "base_trust_requirement": 0.60,
+        "required_attributes": {
+          "role": "physician"
+        }
+      }
+    },
+    "public_portal": {
+      "id": "public_portal",
+      "description": "Hospital Public Info Page",
+      "security_metadata": {
+        "base_trust_requirement": 0.0,
+        "required_attributes": {}
+      }
+    }
+  }
+}

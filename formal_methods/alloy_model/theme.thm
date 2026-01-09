@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<alloy>
+
+<!--
+D-ABAC-Z Visualization Theme
+============================
+This theme configures the visual rendering of Alloy instances to match 
+the architectural diagram (Figure 1) in the paper.
+
+Legend:
+- Blue Ellipse : Subject (Dr. Alice)
+- Yellow Box   : Object (PHR Record)
+- Gray House   : GlobalState (Environment Context)
+- Edges        : Static Permission Assignments (Layer A)
+-->
+
+<view>
+
+  <!-- Global Settings -->
+  <defaultnode/>
+  <defaultedge/>
+
+  <!-- Hide technical primitives to reduce clutter -->
+  <node visible="no">
+     <type name="Int"/>
+     <type name="String"/>
+     <type name="univ"/>
+     <type name="seq/Int"/>
+     <type name="ordering/Ord"/>
+  </node>
+
+  <!-- 
+    Entity: GlobalState 
+    Represents the "Environment" or "PIP" context.
+    Displayed as a House to symbolize the architectural container.
+  -->
+  <node shape="House" color="Gray" label="Context (Risk)">
+     <type name="dabac_z/GlobalState"/>
+  </node>
+
+  <!-- 
+    Entity: Subject 
+    Represents users/devices.
+    Displayed as Blue Ellipse to match "Subject" in Figure 1.
+    Show 'trust' attribute clearly to verify JIT calculation.
+  -->
+  <node shape="Ellipse" color="Blue" label="Subject">
+     <type name="dabac_z/Subject"/>
+  </node>
+
+  <!-- 
+    Entity: Object 
+    Represents resources.
+    Displayed as Yellow Box to match "Object" in Figure 1.
+    Show 'baseReq' to verify threshold logic.
+  -->
+  <node shape="Box" color="Yellow" label="Resource">
+     <type name="dabac_z/Object"/>
+  </node>
+
+  <!-- 
+    Relation: staticMatch
+    Represents Layer 1 (Static Role Assignment).
+    Displayed as a solid black arrow.
+  -->
+  <edge color="Black" style="Solid" label="has_role_access">
+     <relation name="staticMatch"> <type name="dabac_z/Subject"/> <type name="dabac_z/Object"/> </relation>
+  </edge>
+
+  <!-- 
+    Attributes Display Configuration
+    Ensure numeric values (Trust, Risk) are shown as labels on nodes.
+  -->
+  <node showlabel="yes">
+     <set name="$isPermitted_risk" type="Int"/>
+  </node>
+
+</view>
+
+</alloy>

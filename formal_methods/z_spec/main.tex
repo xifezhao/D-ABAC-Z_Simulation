@@ -1,0 +1,155 @@
+\documentclass[11pt]{article}
+\usepackage{zed-csp}
+\usepackage{graphicx}
+\usepackage{url}
+
+% Metadata
+\title{\textbf{Formal Specification of D-ABAC-Z}}
+\author{Artifact Evaluation for ESORICS 2026}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+    This document contains the rigorous Z Notation specification for the D-ABAC-Z framework.
+    It formalizes the Global State, the Just-in-Time (JIT) decision logic, and the
+    Bayesian state transitions described in the paper.
+\end{abstract}
+
+\section{Basic Types and Constants}
+\emph{Mapping: Paper Appendix B.1}
+
+We define the universe of discourse. $SCORE$ is axiomatically defined as a subset of Real numbers bounded in $[0, 1]$.
+
+\begin{zed}
+    [ID, TIME, VALUE, ATTR]
+\end{zed}
+
+\begin{zed}
+    STATUS ::= Permit | Deny
+\end{zed}
+
+\begin{axdef}
+    REAL : \power \arithmos \\
+    SCORE : \power REAL
+\where
+    SCORE = \{ r : REAL | 0 \leq r \leq 1 \}
+\end{axdef}
+
+\section{Auxiliary Functions}
+\emph{Mapping: Paper Appendix B.2}
+
+These functions encapsulate the mathematical kernels (HMM and Decay) outside the state schema.
+
+\begin{axdef}
+    % Calculates the posterior trust given prior and evidence likelihood
+    BayesStep : SCORE \times REAL \to SCORE \\
+    % Calculates exponential decay over time delta
+    TimeDecay : SCORE \times TIME \to SCORE
+\end{axdef}
+
+\begin{axdef}
+    % Lookup functions for Policy Information Point (PIP)
+    subjectAttrs : ID \pfun \power ATTR \\
+    objectReqs : ID \pfun \power ATTR \\
+    BaseTrust : ID \to SCORE \\
+    \alpha : REAL
+\end{axdef}
+
+\section{The Global State}
+\emph{Mapping: Paper Section 4.1}
+
+The system state explicitly tracks the timestamp of the last update to support JIT evaluation.
+
+\begin{schema}{GlobalState}
+    subjects : \power ID \\
+    objects : \power ID \\
+    userTrustScores : ID \pfun SCORE \\
+    lastUpdateTimes : ID \pfun TIME \\
+    envRisk : SCORE
+\where
+    % Invariant: Namespace separation
+    subjects \cap objects = \emptyset \\
+    
+    % Invariant: Data Consistency
+    % Every subject must have a score AND a timestamp
+    \dom userTrustScores = subjects \\
+    \dom lastUpdateTimes = subjects
+\end{schema}
+
+\section{Decision Logic (PDP)}
+\emph{Mapping: Paper Section 4.2}
+
+The \texttt{RequestAccess} operation implements the **Linear Risk-Adaptive Policy (LRAP)**.
+Crucially, it calculates $\tau_{effective}$ dynamically to prevent the "Floating Trust Bug".
+
+\begin{schema}{RequestAccess}
+    \Xi GlobalState \\
+    s? : ID \\
+    o? : ID \\
+    now? : TIME \\
+    decision! : STATUS
+\where
+    s? \in subjects \\
+    o? \in objects \\
+    
+    % Existential quantification for intermediate calculation
+    \exists \tau_{stored}, \tau_{effective} : SCORE @ \\
+    (
+        % 1. Fetch Stored State
+        \tau_{stored} = userTrustScores(s?) 
+        \land
+        % 2. JIT Decay Calculation (The Fix)
+        \tau_{effective} = TimeDecay(\tau_{stored}, now? - lastUpdateTimes(s?))
+        \land
+        % 3. The Decision Inequality
+        (
+            (objectReqs(o?) \subseteq subjectAttrs(s?)) 
+            \land
+            (\tau_{effective} \geq BaseTrust(o?) * (1 + \alpha * envRisk))
+        )
+    )
+    \iff decision! = Permit \\
+    
+    % Default Deny
+    \lnot (\dots) \iff decision! = Deny
+\end{schema}
+
+\section{State Transitions (Trust Engine)}
+\emph{Mapping: Paper Appendix B.3}
+
+The \texttt{UpdateTrust} operation handles the feedback loop from behavioral evidence.
+It updates both the score and the timestamp atomically.
+
+\begin{schema}{UpdateTrust}
+    \Delta GlobalState \\
+    s? : ID \\
+    evidence? : REAL \\
+    dt? : TIME
+\where
+    s? \in subjects \\
+    dt? \geq 0 \\
+    
+    \exists \tau_{prior}, \tau_{decayed}, \tau_{final} : SCORE @ \\
+    (
+        % 1. Align Prior to Now
+        \tau_{prior} = userTrustScores(s?) \land
+        \tau_{decayed} = TimeDecay(\tau_{prior}, dt?) \land
+        
+        % 2. Apply Evidence (Bayes)
+        \tau_{final} = BayesStep(\tau_{decayed}, evidence?) \land
+        
+        % 3. Update State Maps
+        userTrustScores' = userTrustScores \oplus \{ s? \mapsto \tau_{final} \} \land
+        lastUpdateTimes' = lastUpdateTimes \oplus \{ s? \mapsto (lastUpdateTimes(s?) + dt?) \}
+    ) \\
+    
+    % Frame Conditions (Variables that do not change)
+    subjects' = subjects \\
+    objects' = objects \\
+    envRisk' = envRisk
+\end{schema}
+
+\end{document}

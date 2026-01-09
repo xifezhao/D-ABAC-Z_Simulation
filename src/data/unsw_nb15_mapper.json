@@ -1,0 +1,51 @@
+{
+  "_meta": {
+    "source_dataset": "UNSW-NB15",
+    "paper_reference": "Appendix C.2 - Likelihood Ratio Calculation",
+    "description": "Maps observable network features to Likelihood Ratios (L). L = P(Feature|Normal) / P(Feature|Attack)."
+  },
+  "features": {
+    "mfa_success": {
+      "description": "Successful Hardware Token MFA",
+      "p_normal": 0.999,
+      "p_attack": 0.001,
+      "likelihood_ratio": 999.0,
+      "log_evidence": 6.906
+    },
+    "tcp_syn_normal": {
+      "description": "Single SYN packet (Normal Handshake)",
+      "p_normal": 0.85,
+      "p_attack": 0.05,
+      "likelihood_ratio": 17.0,
+      "log_evidence": 2.833
+    },
+    "proto_udp": {
+      "description": "UDP Protocol Usage",
+      "p_normal": 0.60,
+      "p_attack": 0.20,
+      "likelihood_ratio": 3.0,
+      "log_evidence": 1.098
+    },
+    "privileged_port": {
+      "description": "Source Port < 1024",
+      "p_normal": 0.10,
+      "p_attack": 0.40,
+      "likelihood_ratio": 0.25,
+      "log_evidence": -1.386
+    },
+    "ip_geo_hostile": {
+      "description": "IP originating from high-risk geography",
+      "p_normal": 0.01,
+      "p_attack": 0.90,
+      "likelihood_ratio": 0.011,
+      "log_evidence": -4.509
+    },
+    "malicious_payload": {
+      "description": "IDS Signature Match (Exploit)",
+      "p_normal": 0.001,
+      "p_attack": 0.999,
+      "likelihood_ratio": 0.001,
+      "log_evidence": -6.906
+    }
+  }
+}

@@ -1,0 +1,28 @@
+# D-ABAC-Z Simulation Dependencies
+# --------------------------------
+
+# [Core Math]
+# Used for vectorized calculations in the HMM Trust Engine (Section 3.1)
+# and Taylor Series benchmarks (Appendix E).
+numpy>=1.24.0
+
+# [Data Handling]
+# Used to structure simulation traces (Time, Trust, Risk, Decision)
+# and manage the UNSW-NB15 dataset mapping (Appendix C).
+pandas>=2.0.0
+
+# [Data Validation]
+# Enforces strict typing for Subjects, Objects, and Policies,
+# mirroring the rigor of the Z Specification (Section 4).
+pydantic>=2.0.0
+
+# [CLI & Presentation]
+# Used to generate beautiful, color-coded terminal tables and logs,
+# replicating the "Annotated Trace" style shown in Appendix D.3.
+rich>=13.0.0
+
+# [Testing & Benchmarking]
+# Used for the 'benchmark_dos.py' script to measure CPU execution time
+# and verify logic correctness.
+pytest>=7.4.0
+pytest-benchmark>=4.0.0
