@@ -117,6 +117,8 @@ To verify these models, load the `.als` files into the [Alloy Analyzer](https://
 
 ## 📄 Citation
 
+This paper is currently under submission to ESORICS 2026.
+
 If you use this code or framework in your research, please cite:
 
 ```bibtex
